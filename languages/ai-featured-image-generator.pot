@@ -1,0 +1,302 @@
+# Copyright (C) 2026 Sergey Nesmachny
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: AI Featured Image Generator 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-03 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ai-featured-image-generator.php
+msgid "AI Featured Image Generator"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "AI Image Generator"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "API Configuration"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Freepik API Key"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Image Generation Settings"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "AI Model"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Aspect Ratio"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Resolution"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Creative Detailing"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Prompt Template"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "System Prompt"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Category Styles"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Style Presets"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Automation"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Auto-Generate"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Post Types"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Settings"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "API Key Required"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Please enter your Freepik API key to enable image generation."
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Get API Key"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Test API Connection"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Test Connection"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Get your API key from"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Display Name"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Colors"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Elements"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Mood"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Remove"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Enter style key (e.g., \"marketing\", \"finance\"):"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Remove this style?"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Testing..."
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Network error"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Available placeholders:"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Post title"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Style colors (from category style)"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Visual elements (from category style)"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Image mood (from category style)"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Category name"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Post excerpt (first 100 chars)"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "+ Add Style"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Styles are matched by category slug. \"default\" is used when no category matches."
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Automatically generate featured image when post is published (if none set)"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "You can always manually generate images from the post editor"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Enable AI image generation for these post types"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "AI-generated image set"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Manual image set"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "No featured image"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Style:"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Generate Image"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Regenerate"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Generating image... (10-30 sec)"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Image generated successfully!"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Refreshing page..."
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Unknown error"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Regenerate featured image? This will replace the current image."
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Last prompt:"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Post not found"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Post already has a featured image. Use force=true to regenerate."
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Failed to build prompt"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "No image data in API response"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "API key not configured"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "API request failed"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "No task_id in response"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Image generation failed"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Generation timed out after %d seconds"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Failed to download image"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Invalid image data"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Failed to save image file"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Permission denied"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Connection successful!"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "Invalid API key"
+msgstr ""
+
+#: ai-featured-image-generator.php
+msgid "API returned status %d"
+msgstr ""
