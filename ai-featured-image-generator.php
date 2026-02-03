@@ -3,7 +3,7 @@
  * Plugin Name: AI Featured Image Generator
  * Plugin URI: https://github.com/nesmachny/ai-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Sergey Nesmachny
  * Author URI: https://easyfin.pt
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('AIFIG_VERSION', '1.0.0');
+define('AIFIG_VERSION', '1.0.1');
 define('AIFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AIFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('AIFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
