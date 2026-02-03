@@ -3,7 +3,7 @@
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.0.3
+ * Version: 1.1.0
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.0.3');
+define('FPFIG_VERSION', '1.1.0');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -85,6 +85,8 @@ class Freepik_Featured_Image_Generator {
             'aspect_ratio' => 'horizontal_2_1',
             'resolution' => '1k',
             'creative_detailing' => 50,
+            'output_format' => 'webp',
+            'output_quality' => 85,
             'auto_generate' => false,
             'post_types' => ['post'],
             'system_prompt' => "Create a professional blog header illustration for an article titled '{title}'. " .
@@ -289,6 +291,22 @@ class Freepik_Featured_Image_Generator {
             'fpfig_model_section'
         );
 
+        add_settings_field(
+            'output_format',
+            __('Output Format', 'freepik-featured-image-generator'),
+            [$this, 'render_output_format_field'],
+            'freepik-featured-image-generator',
+            'fpfig_model_section'
+        );
+
+        add_settings_field(
+            'output_quality',
+            __('Output Quality', 'freepik-featured-image-generator'),
+            [$this, 'render_output_quality_field'],
+            'freepik-featured-image-generator',
+            'fpfig_model_section'
+        );
+
         // Prompt Section
         add_settings_section(
             'fpfig_prompt_section',
@@ -358,6 +376,8 @@ class Freepik_Featured_Image_Generator {
         $sanitized['aspect_ratio'] = sanitize_text_field($input['aspect_ratio'] ?? 'horizontal_2_1');
         $sanitized['resolution'] = sanitize_text_field($input['resolution'] ?? '1k');
         $sanitized['creative_detailing'] = absint($input['creative_detailing'] ?? 50);
+        $sanitized['output_format'] = sanitize_text_field($input['output_format'] ?? 'webp');
+        $sanitized['output_quality'] = absint($input['output_quality'] ?? 85);
         $sanitized['auto_generate'] = !empty($input['auto_generate']);
         $sanitized['system_prompt'] = wp_kses_post($input['system_prompt'] ?? '');
 
@@ -631,6 +651,50 @@ class Freepik_Featured_Image_Generator {
         <script>
         jQuery('#fpfig-creative-slider').on('input', function() {
             jQuery('#fpfig-creative-value').text(this.value);
+        });
+        </script>
+        <?php
+    }
+
+    public function render_output_format_field() {
+        $value = $this->get_option('output_format');
+        $avif_supported = function_exists('imageavif');
+        $webp_supported = function_exists('imagewebp');
+        ?>
+        <select name="fpfig_settings[output_format]">
+            <option value="original" <?php selected($value, 'original'); ?>><?php _e('Original (as received from API)', 'freepik-featured-image-generator'); ?></option>
+            <option value="jpg" <?php selected($value, 'jpg'); ?>>JPEG</option>
+            <option value="png" <?php selected($value, 'png'); ?>>PNG</option>
+            <?php if ($webp_supported): ?>
+                <option value="webp" <?php selected($value, 'webp'); ?>>WebP <?php _e('(Recommended)', 'freepik-featured-image-generator'); ?></option>
+            <?php else: ?>
+                <option value="webp" disabled>WebP (<?php _e('Not supported by server', 'freepik-featured-image-generator'); ?>)</option>
+            <?php endif; ?>
+            <?php if ($avif_supported): ?>
+                <option value="avif" <?php selected($value, 'avif'); ?>>AVIF <?php _e('(Best compression)', 'freepik-featured-image-generator'); ?></option>
+            <?php else: ?>
+                <option value="avif" disabled>AVIF (<?php _e('Not supported by server', 'freepik-featured-image-generator'); ?>)</option>
+            <?php endif; ?>
+        </select>
+        <p class="description">
+            <?php _e('WebP offers ~30% smaller files than JPEG/PNG. AVIF offers even better compression but requires PHP 8.1+.', 'freepik-featured-image-generator'); ?>
+            <br>
+            <strong><?php _e('Server support:', 'freepik-featured-image-generator'); ?></strong>
+            WebP: <?php echo $webp_supported ? '✅' : '❌'; ?>,
+            AVIF: <?php echo $avif_supported ? '✅' : '❌'; ?>
+        </p>
+        <?php
+    }
+
+    public function render_output_quality_field() {
+        $value = $this->get_option('output_quality');
+        ?>
+        <input type="range" name="fpfig_settings[output_quality]" min="50" max="100" value="<?php echo esc_attr($value); ?>" id="fpfig-quality-slider">
+        <span id="fpfig-quality-value"><?php echo esc_html($value); ?></span>%
+        <p class="description"><?php _e('Quality for JPEG/WebP/AVIF. Higher = better quality but larger files. 80-90 is recommended.', 'freepik-featured-image-generator'); ?></p>
+        <script>
+        jQuery('#fpfig-quality-slider').on('input', function() {
+            jQuery('#fpfig-quality-value').text(this.value);
         });
         </script>
         <?php
@@ -1284,14 +1348,36 @@ class Freepik_Featured_Image_Generator {
             return new WP_Error('invalid_image', __('Invalid image data', 'freepik-featured-image-generator'));
         }
 
-        // Detect image type
+        // Get output format settings
+        $output_format = $this->get_option('output_format');
+        $output_quality = $this->get_option('output_quality');
+
+        // Detect original image type
         $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mime_type = $finfo->buffer($image_data);
-        $extension = 'jpg';
-        if (strpos($mime_type, 'png') !== false) {
-            $extension = 'png';
-        } elseif (strpos($mime_type, 'webp') !== false) {
-            $extension = 'webp';
+        $original_mime = $finfo->buffer($image_data);
+
+        // Determine final format and extension
+        if ($output_format === 'original') {
+            $extension = 'jpg';
+            if (strpos($original_mime, 'png') !== false) {
+                $extension = 'png';
+            } elseif (strpos($original_mime, 'webp') !== false) {
+                $extension = 'webp';
+            } elseif (strpos($original_mime, 'avif') !== false) {
+                $extension = 'avif';
+            }
+            $final_image_data = $image_data;
+        } else {
+            $extension = $output_format;
+            $final_image_data = $this->convert_image($image_data, $output_format, $output_quality);
+            if (is_wp_error($final_image_data)) {
+                // Fallback to original if conversion fails
+                $extension = 'jpg';
+                if (strpos($original_mime, 'png') !== false) {
+                    $extension = 'png';
+                }
+                $final_image_data = $image_data;
+            }
         }
 
         // Generate filename (use post ID to avoid issues with non-ASCII titles)
@@ -1303,7 +1389,7 @@ class Freepik_Featured_Image_Generator {
         $upload_dir = wp_upload_dir();
         $file_path = $upload_dir['path'] . '/' . $filename;
 
-        if (!file_put_contents($file_path, $image_data)) {
+        if (!file_put_contents($file_path, $final_image_data)) {
             return new WP_Error('save_failed', __('Failed to save image file', 'freepik-featured-image-generator'));
         }
 
@@ -1327,6 +1413,77 @@ class Freepik_Featured_Image_Generator {
         wp_update_attachment_metadata($attach_id, $attach_data);
 
         return $attach_id;
+    }
+
+    /**
+     * Convert image to specified format
+     */
+    private function convert_image($image_data, $format, $quality = 85) {
+        // Create image resource from data
+        $image = @imagecreatefromstring($image_data);
+        if (!$image) {
+            return new WP_Error('conversion_failed', __('Failed to create image from data', 'freepik-featured-image-generator'));
+        }
+
+        // Preserve transparency for PNG/WebP
+        imagealphablending($image, true);
+        imagesavealpha($image, true);
+
+        // Capture output to buffer
+        ob_start();
+
+        switch ($format) {
+            case 'jpg':
+            case 'jpeg':
+                // Convert to RGB for JPEG (no alpha)
+                $width = imagesx($image);
+                $height = imagesy($image);
+                $rgb_image = imagecreatetruecolor($width, $height);
+                $white = imagecolorallocate($rgb_image, 255, 255, 255);
+                imagefill($rgb_image, 0, 0, $white);
+                imagecopy($rgb_image, $image, 0, 0, 0, 0, $width, $height);
+                imagejpeg($rgb_image, null, $quality);
+                imagedestroy($rgb_image);
+                break;
+
+            case 'png':
+                // PNG quality is 0-9 (inverted from percentage)
+                $png_quality = (int) ((100 - $quality) / 11.111);
+                imagepng($image, null, $png_quality);
+                break;
+
+            case 'webp':
+                if (!function_exists('imagewebp')) {
+                    imagedestroy($image);
+                    ob_end_clean();
+                    return new WP_Error('webp_not_supported', __('WebP is not supported on this server', 'freepik-featured-image-generator'));
+                }
+                imagewebp($image, null, $quality);
+                break;
+
+            case 'avif':
+                if (!function_exists('imageavif')) {
+                    imagedestroy($image);
+                    ob_end_clean();
+                    return new WP_Error('avif_not_supported', __('AVIF is not supported on this server', 'freepik-featured-image-generator'));
+                }
+                imageavif($image, null, $quality);
+                break;
+
+            default:
+                imagedestroy($image);
+                ob_end_clean();
+                return new WP_Error('unknown_format', __('Unknown output format', 'freepik-featured-image-generator'));
+        }
+
+        $output = ob_get_clean();
+        imagedestroy($image);
+
+        if (empty($output)) {
+            return new WP_Error('conversion_failed', __('Image conversion produced empty output', 'freepik-featured-image-generator'));
+        }
+
+        return $output;
     }
 
     /**
