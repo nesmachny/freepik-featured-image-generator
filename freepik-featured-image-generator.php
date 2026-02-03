@@ -3,7 +3,7 @@
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.1.0');
+define('FPFIG_VERSION', '1.1.1');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -93,10 +93,10 @@ class Freepik_Featured_Image_Generator {
                 "Style: {style_description}. " .
                 "Include visual elements: {elements}. " .
                 "Mood: {mood}. " .
-                "No text, letters or words in the image. " .
+                "CRITICAL: Absolutely NO text, NO letters, NO words, NO numbers, NO typography, NO writing, NO captions, NO labels, NO signs anywhere in the image - the image must be completely text-free. " .
                 "If currency symbols are used, use Euro (€) symbol, never US Dollar ($). " .
                 "Clean simple background, professional corporate style. " .
-                "High quality, sharp details.",
+                "High quality, sharp details, photorealistic rendering.",
             'category_styles' => [
                 'default' => [
                     'name' => 'Default',
@@ -1244,6 +1244,7 @@ class Freepik_Featured_Image_Generator {
 
         $body = [
             'prompt' => $prompt,
+            'negative_prompt' => 'text, letters, words, numbers, typography, writing, captions, labels, signs, watermarks, logos, titles, headlines, subtitles, inscriptions, characters, fonts, alphabet',
             'aspect_ratio' => $this->get_option('aspect_ratio'),
             'resolution' => $this->get_option('resolution'),
         ];
