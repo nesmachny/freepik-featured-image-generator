@@ -3,7 +3,7 @@
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.0.2');
+define('FPFIG_VERSION', '1.0.3');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -1294,11 +1294,9 @@ class Freepik_Featured_Image_Generator {
             $extension = 'webp';
         }
 
-        // Generate filename
+        // Generate filename (use post ID to avoid issues with non-ASCII titles)
         if (!$filename) {
-            $post = get_post($post_id);
-            $slug = $post ? sanitize_title($post->post_title) : 'ai-image';
-            $filename = $slug . '-' . time() . '.' . $extension;
+            $filename = 'fpfig-post-' . $post_id . '-' . time() . '.' . $extension;
         }
 
         // Save file
