@@ -3,7 +3,7 @@
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.0.1');
+define('FPFIG_VERSION', '1.0.2');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -929,10 +929,10 @@ class Freepik_Featured_Image_Generator {
 
         <script>
         function fpfig_generate(postId, force) {
-            var box = document.getElementById('aifig-generator-box');
-            var generating = document.getElementById('aifig-generating');
-            var errorDiv = document.getElementById('aifig-error');
-            var successDiv = document.getElementById('aifig-success');
+            var box = document.getElementById('fpfig-generator-box');
+            var generating = document.getElementById('fpfig-generating');
+            var errorDiv = document.getElementById('fpfig-error');
+            var successDiv = document.getElementById('fpfig-success');
 
             // Reset messages
             errorDiv.style.display = 'none';
@@ -948,7 +948,7 @@ class Freepik_Featured_Image_Generator {
             box.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
 
             // Make request
-            var url = '<?php echo rest_url('aifig/v1/generate/'); ?>' + postId + (force ? '?force=1' : '');
+            var url = '<?php echo rest_url('fpfig/v1/generate/'); ?>' + postId + (force ? '?force=1' : '');
 
             fetch(url, {
                 method: 'POST',
