@@ -75,9 +75,9 @@ class AI_Featured_Image_Generator {
     }
 
     /**
-     * Get default options
+     * Get default options (static version for activation hook)
      */
-    public function get_default_options() {
+    public static function get_default_options_static() {
         return [
             'api_key' => '',
             'model' => 'mystic',
@@ -95,8 +95,52 @@ class AI_Featured_Image_Generator {
                 "If currency symbols are used, use Euro (€) symbol, never US Dollar ($). " .
                 "Clean simple background, professional corporate style. " .
                 "High quality, sharp details.",
-            'category_styles' => $this->get_default_category_styles(),
+            'category_styles' => [
+                'default' => [
+                    'name' => 'Default',
+                    'colors' => 'teal and white tones',
+                    'elements' => 'financial charts, business elements',
+                    'mood' => 'professional and trustworthy',
+                ],
+                'taxes' => [
+                    'name' => 'Taxes',
+                    'colors' => 'warm amber and gold tones',
+                    'elements' => 'calendar, documents, calculator, euro coins',
+                    'mood' => 'professional and organized',
+                ],
+                'invoicing' => [
+                    'name' => 'Invoicing',
+                    'colors' => 'blue and white tones',
+                    'elements' => 'invoices, receipts, digital documents, laptop',
+                    'mood' => 'modern and efficient',
+                ],
+                'business' => [
+                    'name' => 'Business Tips',
+                    'colors' => 'green and teal tones',
+                    'elements' => 'growth charts, lightbulb, business icons',
+                    'mood' => 'inspiring and helpful',
+                ],
+                'news' => [
+                    'name' => 'News',
+                    'colors' => 'purple and violet tones',
+                    'elements' => 'newspaper, notifications, megaphone',
+                    'mood' => 'dynamic and informative',
+                ],
+                'technology' => [
+                    'name' => 'Technology',
+                    'colors' => 'teal and cyan tones',
+                    'elements' => 'dashboard, integration icons, connected devices',
+                    'mood' => 'tech-forward and seamless',
+                ],
+            ],
         ];
+    }
+
+    /**
+     * Get default options
+     */
+    public function get_default_options() {
+        return self::get_default_options_static();
     }
 
     /**
@@ -1369,8 +1413,7 @@ add_action('wp_ajax_aifig_test_api', function() {
 register_activation_hook(__FILE__, function() {
     // Set default options if not exists
     if (!get_option('aifig_settings')) {
-        $plugin = new AI_Featured_Image_Generator();
-        add_option('aifig_settings', $plugin->get_default_options());
+        add_option('aifig_settings', AI_Featured_Image_Generator::get_default_options_static());
     }
 });
 
