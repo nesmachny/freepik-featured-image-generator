@@ -1,4 +1,4 @@
-# AI Featured Image Generator
+# Freepik Featured Image Generator
 
 A WordPress plugin that generates AI-powered featured images for posts using the Freepik API. Supports multiple AI models, customizable styles, and automatic generation.
 
