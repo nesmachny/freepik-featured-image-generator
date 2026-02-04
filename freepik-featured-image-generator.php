@@ -3,7 +3,7 @@
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.2.0');
+define('FPFIG_VERSION', '1.2.1');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -207,9 +207,11 @@ class Freepik_Featured_Image_Generator {
         $model = $this->get_option('model');
         $urls = [
             'mystic' => 'https://api.freepik.com/v1/ai/mystic',
-            'flux-dev' => 'https://api.freepik.com/v1/ai/flux/dev',
-            'flux-pro' => 'https://api.freepik.com/v1/ai/flux/pro',
-            'flux-realism' => 'https://api.freepik.com/v1/ai/flux-realism',
+            'flux-dev' => 'https://api.freepik.com/v1/ai/flux-dev',
+            'flux-pro' => 'https://api.freepik.com/v1/ai/flux-pro-v1-1',
+            'flux-2-pro' => 'https://api.freepik.com/v1/ai/flux-2-pro',
+            'flux-2-turbo' => 'https://api.freepik.com/v1/ai/flux-2-turbo',
+            'hyperflux' => 'https://api.freepik.com/v1/ai/hyperflux',
         ];
         return $urls[$model] ?? $urls['mystic'];
     }
@@ -594,8 +596,10 @@ class Freepik_Featured_Image_Generator {
         <select name="fpfig_settings[model]" id="fpfig-model-select">
             <option value="mystic" <?php selected($value, 'mystic'); ?>>Mystic (Best for illustrations)</option>
             <option value="flux-dev" <?php selected($value, 'flux-dev'); ?>>Flux Dev (Fast, good quality)</option>
-            <option value="flux-pro" <?php selected($value, 'flux-pro'); ?>>Flux Pro (Premium quality)</option>
-            <option value="flux-realism" <?php selected($value, 'flux-realism'); ?>>Flux Realism (Photorealistic)</option>
+            <option value="flux-pro" <?php selected($value, 'flux-pro'); ?>>Flux Pro 1.1 (Premium quality)</option>
+            <option value="flux-2-pro" <?php selected($value, 'flux-2-pro'); ?>>Flux 2 Pro (Latest premium)</option>
+            <option value="flux-2-turbo" <?php selected($value, 'flux-2-turbo'); ?>>Flux 2 Turbo (Fast premium)</option>
+            <option value="hyperflux" <?php selected($value, 'hyperflux'); ?>>HyperFlux (Ultra fast)</option>
         </select>
 
         <div id="fpfig-submodel-container" style="margin-top: 10px; <?php echo $value !== 'mystic' ? 'display:none;' : ''; ?>">
