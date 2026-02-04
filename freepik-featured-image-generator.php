@@ -3,7 +3,7 @@
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.2.2');
+define('FPFIG_VERSION', '1.2.3');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -207,11 +207,11 @@ class Freepik_Featured_Image_Generator {
         $model = $this->get_option('model');
         $urls = [
             'mystic' => 'https://api.freepik.com/v1/ai/mystic',
-            'flux-dev' => 'https://api.freepik.com/v1/ai/flux-dev',
-            'flux-pro' => 'https://api.freepik.com/v1/ai/flux-pro-v1-1',
-            'flux-2-pro' => 'https://api.freepik.com/v1/ai/flux-2-pro',
-            'flux-2-turbo' => 'https://api.freepik.com/v1/ai/flux-2-turbo',
-            'hyperflux' => 'https://api.freepik.com/v1/ai/hyperflux',
+            'flux-dev' => 'https://api.freepik.com/v1/ai/text-to-image/flux-dev',
+            'flux-pro' => 'https://api.freepik.com/v1/ai/text-to-image/flux-pro-v1-1',
+            'flux-2-pro' => 'https://api.freepik.com/v1/ai/text-to-image/flux-2-pro',
+            'flux-2-turbo' => 'https://api.freepik.com/v1/ai/text-to-image/flux-2-turbo',
+            'hyperflux' => 'https://api.freepik.com/v1/ai/text-to-image/hyperflux',
         ];
         return $urls[$model] ?? $urls['mystic'];
     }
