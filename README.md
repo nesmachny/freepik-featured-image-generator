@@ -4,13 +4,16 @@ A WordPress plugin that generates AI-powered featured images for posts using the
 
 ## Features
 
-- **Multiple AI Models**: Choose from Mystic, Flux Dev, Flux Pro, or Flux Realism
+- **Multiple AI Models**: Mystic, Flux Dev, Flux Pro 1.1, Flux 2 Pro, Flux 2 Turbo, HyperFlux
+- **Manual Style Selector**: Choose style preset manually or auto-detect by category
 - **Customizable Styles**: Define visual styles for different content categories
 - **Flexible Prompts**: Edit the system prompt template with placeholders
+- **Output Formats**: Save images as WebP, AVIF, JPEG, or PNG
 - **Auto-Generation**: Optionally generate images automatically when posts are published
 - **Multiple Post Types**: Enable for posts, pages, or custom post types
 - **Metabox Interface**: Easy-to-use interface in the post editor
 - **REST API**: Programmatic access for custom integrations
+- **Anti-Text Protection**: Built-in negative prompt to prevent text in images
 
 ## Installation
 
@@ -33,8 +36,19 @@ A WordPress plugin that generates AI-powered featured images for posts using the
 |-------|----------|---------|-------|
 | Mystic | Illustrations, flat design | Excellent | Medium |
 | Flux Dev | General purpose | Good | Fast |
-| Flux Pro | High quality | Premium | Slow |
-| Flux Realism | Photorealistic | Excellent | Medium |
+| Flux Pro 1.1 | High quality | Premium | Slow |
+| Flux 2 Pro | Latest premium | Premium | Medium |
+| Flux 2 Turbo | Fast premium | Premium | Fast |
+| HyperFlux | Speed priority | Good | Ultra Fast |
+
+### Output Formats
+
+| Format | Best For | File Size |
+|--------|----------|-----------|
+| WebP | Modern browsers (recommended) | Small |
+| AVIF | Latest browsers | Smallest |
+| JPEG | Maximum compatibility | Medium |
+| PNG | Transparency support | Large |
 
 ### Aspect Ratios
 
@@ -75,7 +89,7 @@ Define visual styles for each content category:
 
 1. Create or edit a post
 2. Find the "AI Image Generator" metabox in the sidebar
-3. Review the style preview based on the post's category
+3. Select style manually or use "Auto (by category)"
 4. Click "Generate Image" or "Regenerate"
 5. Wait 10-30 seconds for generation
 
@@ -83,12 +97,14 @@ Define visual styles for each content category:
 
 Generate image for a post:
 ```bash
-POST /wp-json/aifig/v1/generate/{post_id}
+POST /wp-json/fpfig/v1/generate/{post_id}
+POST /wp-json/fpfig/v1/generate/{post_id}?style=marketing
+POST /wp-json/fpfig/v1/generate/{post_id}?force=1
 ```
 
 Generate with custom prompt:
 ```bash
-POST /wp-json/aifig/v1/custom
+POST /wp-json/fpfig/v1/custom
 Content-Type: application/json
 
 {
@@ -101,13 +117,31 @@ Content-Type: application/json
 
 - WordPress 5.8 or higher
 - PHP 7.4 or higher
+- GD library (for WebP/AVIF conversion)
 - Freepik API key with AI credits
 
 ## Changelog
 
+### 1.2.1
+- Fixed Flux Pro API endpoint URL
+- Added new models: Flux 2 Pro, Flux 2 Turbo, HyperFlux
+- Removed non-existent Flux Realism model
+
+### 1.2.0
+- Added manual style selector in metabox
+- Style preview updates dynamically
+- Selected style saved per post
+
+### 1.1.1
+- Added negative_prompt to prevent text in images
+
+### 1.1.0
+- Added output format selection (WebP, AVIF, JPEG, PNG)
+- Image conversion with GD library
+
 ### 1.0.0
 - Initial release
-- Support for Mystic, Flux Dev, Flux Pro, Flux Realism models
+- Support for Mystic, Flux Dev, Flux Pro models
 - Customizable styles and prompts
 - Auto-generation option
 - REST API endpoints
@@ -118,6 +152,6 @@ GPL v2 or later
 
 ## Credits
 
-Developed by [Sergey Nesmachny](https://easyfin.pt)
+Developed by [Sergey Nesmachny](https://nesmachny.com)
 
 Uses [Freepik AI API](https://www.freepik.com/api) for image generation.
