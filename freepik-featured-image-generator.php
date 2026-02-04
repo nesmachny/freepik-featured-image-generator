@@ -3,7 +3,7 @@
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
  * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.1.1
+ * Version: 1.2.0
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.1.1');
+define('FPFIG_VERSION', '1.2.0');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -951,12 +951,33 @@ class Freepik_Featured_Image_Generator {
                 <?php endif; ?>
             </div>
 
+            <!-- Style Selector -->
+            <?php
+            $all_styles = $this->get_option('category_styles');
+            $used_style = get_post_meta($post->ID, '_fpfig_style_key', true);
+            ?>
+            <div class="style-selector" style="margin-bottom: 12px;">
+                <label for="fpfig-style-select" style="display: block; margin-bottom: 4px; font-weight: 500;">
+                    <?php _e('Style:', 'freepik-featured-image-generator'); ?>
+                </label>
+                <select id="fpfig-style-select" style="width: 100%;">
+                    <option value="auto" <?php selected(!$used_style || $used_style === 'auto'); ?>>
+                        🔄 <?php _e('Auto (by category)', 'freepik-featured-image-generator'); ?> → <?php echo esc_html($style['name'] ?? ucfirst($current_category)); ?>
+                    </option>
+                    <?php foreach ($all_styles as $style_key => $style_data): ?>
+                        <option value="<?php echo esc_attr($style_key); ?>" <?php selected($used_style, $style_key); ?>>
+                            <?php echo esc_html($style_data['name'] ?? ucfirst($style_key)); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
             <!-- Style Preview -->
-            <div class="style-preview">
-                <h4>📋 <?php _e('Style:', 'freepik-featured-image-generator'); ?> <?php echo esc_html($style['name'] ?? ucfirst($current_category)); ?></h4>
-                <p><strong><?php _e('Colors:', 'freepik-featured-image-generator'); ?></strong> <?php echo esc_html($style['colors']); ?></p>
-                <p><strong><?php _e('Elements:', 'freepik-featured-image-generator'); ?></strong> <?php echo esc_html($style['elements']); ?></p>
-                <p><strong><?php _e('Mood:', 'freepik-featured-image-generator'); ?></strong> <?php echo esc_html($style['mood']); ?></p>
+            <div class="style-preview" id="fpfig-style-preview">
+                <h4>📋 <?php _e('Style Preview', 'freepik-featured-image-generator'); ?></h4>
+                <p><strong><?php _e('Colors:', 'freepik-featured-image-generator'); ?></strong> <span id="fpfig-preview-colors"><?php echo esc_html($style['colors']); ?></span></p>
+                <p><strong><?php _e('Elements:', 'freepik-featured-image-generator'); ?></strong> <span id="fpfig-preview-elements"><?php echo esc_html($style['elements']); ?></span></p>
+                <p><strong><?php _e('Mood:', 'freepik-featured-image-generator'); ?></strong> <span id="fpfig-preview-mood"><?php echo esc_html($style['mood']); ?></span></p>
             </div>
 
             <!-- Buttons -->
@@ -992,11 +1013,29 @@ class Freepik_Featured_Image_Generator {
         </div>
 
         <script>
+        // Style data for preview updates
+        var fpfigStyles = <?php echo json_encode($all_styles); ?>;
+        var fpfigAutoStyle = <?php echo json_encode($style); ?>;
+
+        // Update preview when style changes
+        document.getElementById('fpfig-style-select').addEventListener('change', function() {
+            var selectedKey = this.value;
+            var styleData = (selectedKey === 'auto') ? fpfigAutoStyle : fpfigStyles[selectedKey];
+
+            if (styleData) {
+                document.getElementById('fpfig-preview-colors').textContent = styleData.colors || 'professional colors';
+                document.getElementById('fpfig-preview-elements').textContent = styleData.elements || 'business elements';
+                document.getElementById('fpfig-preview-mood').textContent = styleData.mood || 'professional';
+            }
+        });
+
         function fpfig_generate(postId, force) {
             var box = document.getElementById('fpfig-generator-box');
             var generating = document.getElementById('fpfig-generating');
             var errorDiv = document.getElementById('fpfig-error');
             var successDiv = document.getElementById('fpfig-success');
+            var styleSelect = document.getElementById('fpfig-style-select');
+            var selectedStyle = styleSelect.value;
 
             // Reset messages
             errorDiv.style.display = 'none';
@@ -1010,9 +1049,14 @@ class Freepik_Featured_Image_Generator {
             // Show loading
             generating.classList.add('active');
             box.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+            styleSelect.disabled = true;
 
-            // Make request
-            var url = '<?php echo rest_url('fpfig/v1/generate/'); ?>' + postId + (force ? '?force=1' : '');
+            // Make request with style parameter
+            var url = '<?php echo rest_url('fpfig/v1/generate/'); ?>' + postId;
+            var params = [];
+            if (force) params.push('force=1');
+            if (selectedStyle && selectedStyle !== 'auto') params.push('style=' + encodeURIComponent(selectedStyle));
+            if (params.length) url += '?' + params.join('&');
 
             fetch(url, {
                 method: 'POST',
@@ -1025,6 +1069,7 @@ class Freepik_Featured_Image_Generator {
             .then(function(data) {
                 generating.classList.remove('active');
                 box.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
+                styleSelect.disabled = false;
 
                 if (data.success) {
                     successDiv.innerHTML = '✅ <?php _e('Image generated successfully!', 'freepik-featured-image-generator'); ?><br><small><?php _e('Refreshing page...', 'freepik-featured-image-generator'); ?></small>';
@@ -1038,6 +1083,7 @@ class Freepik_Featured_Image_Generator {
             .catch(function(e) {
                 generating.classList.remove('active');
                 box.querySelectorAll('button').forEach(function(b) { b.disabled = false; });
+                styleSelect.disabled = false;
                 errorDiv.innerHTML = '❌ <?php _e('Network error:', 'freepik-featured-image-generator'); ?> ' + e.message;
                 errorDiv.style.display = 'block';
             });
@@ -1065,6 +1111,11 @@ class Freepik_Featured_Image_Generator {
                     'required' => false,
                     'type' => 'boolean',
                     'default' => false,
+                ],
+                'style' => [
+                    'required' => false,
+                    'type' => 'string',
+                    'default' => '',
                 ],
             ],
         ]);
@@ -1094,6 +1145,7 @@ class Freepik_Featured_Image_Generator {
     public function rest_generate_image($request) {
         $post_id = $request->get_param('post_id');
         $force = $request->get_param('force');
+        $style_key = $request->get_param('style');
 
         $post = get_post($post_id);
         if (!$post) {
@@ -1108,8 +1160,8 @@ class Freepik_Featured_Image_Generator {
             ];
         }
 
-        // Build prompt
-        $prompt_data = $this->build_image_prompt($post_id);
+        // Build prompt (with optional style override)
+        $prompt_data = $this->build_image_prompt($post_id, $style_key);
         if (!$prompt_data) {
             return new WP_Error('prompt_failed', __('Failed to build prompt', 'freepik-featured-image-generator'));
         }
@@ -1139,6 +1191,7 @@ class Freepik_Featured_Image_Generator {
         update_post_meta($post_id, '_fpfig_generated', true);
         update_post_meta($post_id, '_fpfig_prompt', $prompt_data['prompt']);
         update_post_meta($post_id, '_fpfig_category', $prompt_data['category']);
+        update_post_meta($post_id, '_fpfig_style_key', $prompt_data['style_key'] ?? '');
 
         return [
             'success' => true,
@@ -1194,7 +1247,7 @@ class Freepik_Featured_Image_Generator {
     /**
      * Build prompt from post content
      */
-    public function build_image_prompt($post_id) {
+    public function build_image_prompt($post_id, $style_key = '') {
         $post = get_post($post_id);
         if (!$post) {
             return null;
@@ -1204,7 +1257,15 @@ class Freepik_Featured_Image_Generator {
         $categories = wp_get_post_categories($post_id, ['fields' => 'all']);
         $category_slug = !empty($categories) ? $categories[0]->slug : 'default';
         $category_name = !empty($categories) ? $categories[0]->name : 'General';
-        $style = $this->get_category_style($category_slug);
+
+        // Use custom style if provided, otherwise auto-detect from category
+        if ($style_key && $style_key !== 'auto') {
+            $style = $this->get_category_style($style_key);
+            $used_style_key = $style_key;
+        } else {
+            $style = $this->get_category_style($category_slug);
+            $used_style_key = 'auto';
+        }
 
         // Get prompt template
         $template = $this->get_option('system_prompt');
@@ -1227,6 +1288,7 @@ class Freepik_Featured_Image_Generator {
             'prompt' => $prompt,
             'category' => $category_slug,
             'style' => $style,
+            'style_key' => $used_style_key,
         ];
     }
 
