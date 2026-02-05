@@ -17,7 +17,7 @@ A WordPress plugin that generates AI-powered featured images for posts using the
 
 ## Installation
 
-1. Download the plugin zip file
+1. [Download the latest release](https://github.com/nesmachny/freepik-featured-image-generator/releases/latest/download/freepik-featured-image-generator.zip)
 2. Go to WordPress Admin > Plugins > Add New > Upload Plugin
 3. Upload the zip file and click "Install Now"
 4. Activate the plugin
