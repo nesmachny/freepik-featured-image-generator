@@ -1,13 +1,17 @@
 # Freepik Featured Image Generator
 
-A WordPress plugin that generates AI-powered featured images for posts using the Freepik API. Supports multiple AI models, customizable styles, and automatic generation.
+A WordPress plugin that generates AI-powered featured images for posts using Freepik or OpenRouter API. Supports multiple providers, AI models, customizable styles, and automatic generation.
 
 ## Features
 
-- **Multiple AI Models**: Mystic, Flux Dev, Flux Pro 1.1, Flux 2 Pro, Flux 2 Turbo, HyperFlux
+- **Multiple API Providers**: Freepik and OpenRouter with easy switching
+- **AI-Powered Prompts**: OpenRouter uses a text LLM to analyze post content and generate optimal image prompts
+- **Multiple AI Models**:
+  - Freepik: Mystic, Flux Dev, Flux Pro 1.1, Flux 2 Pro, Flux 2 Turbo, HyperFlux
+  - OpenRouter: Nano Banana 2 (Gemini 3.1 Flash), Nano Banana (Gemini 2.5 Flash), Nano Banana Pro (Gemini 3 Pro), GPT-5 Image
 - **Manual Style Selector**: Choose style preset manually or auto-detect by category
 - **Customizable Styles**: Define visual styles for different content categories
-- **Flexible Prompts**: Edit the system prompt template with placeholders
+- **Flexible Prompts**: Edit prompt templates with placeholders (Freepik) or LLM system instructions (OpenRouter)
 - **Output Formats**: Save images as WebP, AVIF, JPEG, or PNG
 - **Auto-Generation**: Optionally generate images automatically when posts are published
 - **Multiple Post Types**: Enable for posts, pages, or custom post types
@@ -25,12 +29,35 @@ A WordPress plugin that generates AI-powered featured images for posts using the
 
 ## Configuration
 
-### API Key
+### API Provider
+
+Choose between **Freepik** and **OpenRouter** in Settings > AI Image Generator > API Provider. The settings page dynamically shows configuration fields for the selected provider.
+
+### Freepik Setup
 
 1. Get your API key from [Freepik API](https://www.freepik.com/api)
-2. Enter the key in Settings > AI Image Generator > API Key
+2. Enter the key in Freepik API Key field
+
+### OpenRouter Setup
+
+1. Get your API key from [OpenRouter](https://openrouter.ai/keys)
+2. Enter the key in OpenRouter API Key field
+3. Select an Image Model for generation
+4. Select a Prompt Model (text LLM that analyzes your content)
+5. Customize the Prompt System Instructions if needed
+
+### How OpenRouter Works
+
+OpenRouter uses a two-step process:
+
+1. **Step 1 — Prompt Generation**: A text LLM (e.g., Gemini 2.5 Flash) reads the full post content, title, category, and style preferences, then generates an optimized image generation prompt
+2. **Step 2 — Image Generation**: The generated prompt is sent to an image model (e.g., Gemini 3.1 Flash) to create the featured image
+
+This produces more contextually relevant images compared to template-based prompts.
 
 ### AI Models
+
+#### Freepik Models
 
 | Model | Best For | Quality | Speed |
 |-------|----------|---------|-------|
@@ -40,6 +67,24 @@ A WordPress plugin that generates AI-powered featured images for posts using the
 | Flux 2 Pro | Latest premium | Premium | Medium |
 | Flux 2 Turbo | Fast premium | Premium | Fast |
 | HyperFlux | Speed priority | Good | Ultra Fast |
+
+#### OpenRouter Image Models
+
+| Model | Description |
+|-------|-------------|
+| Nano Banana 2 (Gemini 3.1 Flash) | Latest, recommended |
+| Nano Banana (Gemini 2.5 Flash) | Stable, fast |
+| Nano Banana Pro (Gemini 3 Pro) | Higher quality |
+| GPT-5 Image | OpenAI image generation |
+
+#### OpenRouter Prompt Models
+
+| Model | Best For |
+|-------|----------|
+| Gemini 2.5 Flash | Fast, cheap, recommended |
+| Gemini 2.5 Pro | Higher quality prompts |
+| Claude Sonnet 4 | Creative prompts |
+| GPT-4.1 Mini | Fast alternative |
 
 ### Output Formats
 
@@ -60,7 +105,7 @@ A WordPress plugin that generates AI-powered featured images for posts using the
 - **21:9 Panoramic** - Wide banners
 - **9:16 Vertical** - Stories, mobile
 
-### System Prompt
+### System Prompt (Freepik)
 
 Customize the prompt template using these placeholders:
 
@@ -118,9 +163,22 @@ Content-Type: application/json
 - WordPress 5.8 or higher
 - PHP 7.4 or higher
 - GD library (for WebP/AVIF conversion)
-- Freepik API key with AI credits
+- Freepik API key or OpenRouter API key
 
 ## Changelog
+
+### 1.3.0
+- Added OpenRouter as second API provider
+- AI-powered prompt generation: text LLM reads post content and creates optimized image prompts
+- New image models: Gemini 3.1 Flash, Gemini 2.5 Flash, Gemini 3 Pro, GPT-5 Image
+- New prompt models: Gemini 2.5 Flash, Gemini 2.5 Pro, Claude Sonnet 4, GPT-4.1 Mini
+- Configurable prompt system instructions
+- Dynamic settings page: shows/hides fields based on selected provider
+- Provider-aware API test, metabox, and notices
+
+### 1.2.3
+- Added output quality slider for JPEG/WebP/AVIF
+- Minor UI improvements
 
 ### 1.2.1
 - Fixed Flux Pro API endpoint URL
@@ -154,4 +212,4 @@ GPL v2 or later
 
 Developed by [Sergey Nesmachny](https://nesmachny.com)
 
-Uses [Freepik AI API](https://www.freepik.com/api) for image generation.
+Uses [Freepik AI API](https://www.freepik.com/api) and [OpenRouter API](https://openrouter.ai) for image generation.

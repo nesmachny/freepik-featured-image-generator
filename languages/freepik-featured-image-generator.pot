@@ -2,9 +2,9 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Freepik Featured Image Generator 1.0.0\n"
+"Project-Id-Version: Freepik Featured Image Generator 1.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-03 00:00+0000\n"
+"POT-Creation-Date: 2026-02-28 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -22,7 +22,31 @@ msgid "AI Image Generator"
 msgstr ""
 
 #: freepik-featured-image-generator.php
-msgid "API Configuration"
+msgid "AI Featured Image Generator"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "API Provider"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Choose which API provider to use for image generation."
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Provider"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Select the API provider for image generation."
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Freepik API Configuration"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Configure your Freepik API credentials."
 msgstr ""
 
 #: freepik-featured-image-generator.php
@@ -30,7 +54,47 @@ msgid "Freepik API Key"
 msgstr ""
 
 #: freepik-featured-image-generator.php
+msgid "OpenRouter API Configuration"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Configure your OpenRouter API credentials."
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "OpenRouter API Key"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Image Model"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Select the AI model for image generation via OpenRouter."
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Prompt Model"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Text model that reads post content and generates the image prompt. Fast and cheap models work best."
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Prompt System Instructions"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "System instructions for the text model that generates the image prompt from post content."
+msgstr ""
+
+#: freepik-featured-image-generator.php
 msgid "Image Generation Settings"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Configure image generation parameters."
 msgstr ""
 
 #: freepik-featured-image-generator.php
@@ -50,7 +114,19 @@ msgid "Creative Detailing"
 msgstr ""
 
 #: freepik-featured-image-generator.php
+msgid "Output Format"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Output Quality"
+msgstr ""
+
+#: freepik-featured-image-generator.php
 msgid "Prompt Template"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Customize the prompt template used for image generation."
 msgstr ""
 
 #: freepik-featured-image-generator.php
@@ -62,11 +138,19 @@ msgid "Category Styles"
 msgstr ""
 
 #: freepik-featured-image-generator.php
+msgid "Define visual styles for different content categories. The style will be selected based on the post's primary category."
+msgstr ""
+
+#: freepik-featured-image-generator.php
 msgid "Style Presets"
 msgstr ""
 
 #: freepik-featured-image-generator.php
 msgid "Automation"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Configure automatic image generation behavior."
 msgstr ""
 
 #: freepik-featured-image-generator.php
@@ -87,6 +171,10 @@ msgstr ""
 
 #: freepik-featured-image-generator.php
 msgid "Please enter your Freepik API key to enable image generation."
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Please enter your OpenRouter API key to enable image generation."
 msgstr ""
 
 #: freepik-featured-image-generator.php
@@ -139,6 +227,10 @@ msgstr ""
 
 #: freepik-featured-image-generator.php
 msgid "Network error"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Network error:"
 msgstr ""
 
 #: freepik-featured-image-generator.php
@@ -206,6 +298,14 @@ msgid "Style:"
 msgstr ""
 
 #: freepik-featured-image-generator.php
+msgid "Auto (by category)"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Style Preview"
+msgstr ""
+
+#: freepik-featured-image-generator.php
 msgid "Generate Image"
 msgstr ""
 
@@ -238,6 +338,10 @@ msgid "Last prompt:"
 msgstr ""
 
 #: freepik-featured-image-generator.php
+msgid "Please configure your API key in"
+msgstr ""
+
+#: freepik-featured-image-generator.php
 msgid "Post not found"
 msgstr ""
 
@@ -255,6 +359,18 @@ msgstr ""
 
 #: freepik-featured-image-generator.php
 msgid "API key not configured"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "OpenRouter API key not configured"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "OpenRouter API request failed"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "No image in OpenRouter response"
 msgstr ""
 
 #: freepik-featured-image-generator.php
@@ -286,17 +402,81 @@ msgid "Failed to save image file"
 msgstr ""
 
 #: freepik-featured-image-generator.php
+msgid "Failed to create image from data"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Image conversion produced empty output"
+msgstr ""
+
+#: freepik-featured-image-generator.php
 msgid "Permission denied"
 msgstr ""
 
 #: freepik-featured-image-generator.php
-msgid "Connection successful!"
+msgid "OpenRouter connection successful!"
 msgstr ""
 
 #: freepik-featured-image-generator.php
-msgid "Invalid API key"
+msgid "Invalid OpenRouter API key"
 msgstr ""
 
 #: freepik-featured-image-generator.php
-msgid "API returned status %d"
+msgid "OpenRouter API returned status %d"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Freepik API key not configured"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Freepik connection successful!"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Invalid Freepik API key"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Freepik API returned status %d"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Recommended: 2:1 Horizontal for blog featured images"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "1K is usually sufficient for web use"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Higher values = more creative freedom, lower = more prompt adherence"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Original (as received from API)"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "(Recommended)"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "(Best compression)"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Not supported by server"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Server support:"
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Quality for JPEG/WebP/AVIF. Higher = better quality but larger files. 80-90 is recommended."
+msgstr ""
+
+#: freepik-featured-image-generator.php
+msgid "Mystic Sub-Model:"
 msgstr ""

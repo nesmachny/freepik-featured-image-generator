@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Freepik Featured Image Generator
  * Plugin URI: https://nesmachny.com/freepik-featured-image-generator
- * Description: Generate AI-powered featured images for posts using Freepik API. Supports multiple models, customizable styles, and automatic generation.
- * Version: 1.2.3
+ * Description: Generate AI-powered featured images for posts using Freepik or OpenRouter API. Supports multiple providers, models, customizable styles, and automatic generation.
+ * Version: 1.3.0
  * Author: Sergey Nesmachny
  * Author URI: https://nesmachny.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('FPFIG_VERSION', '1.2.3');
+define('FPFIG_VERSION', '1.3.0');
 define('FPFIG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FPFIG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FPFIG_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -79,7 +79,12 @@ class Freepik_Featured_Image_Generator {
      */
     public static function get_default_options_static() {
         return [
+            'api_provider' => 'freepik',
             'api_key' => '',
+            'openrouter_api_key' => '',
+            'openrouter_model' => 'google/gemini-3.1-flash-image-preview',
+            'openrouter_prompt_model' => 'google/gemini-2.5-flash',
+            'openrouter_prompt_system' => "You are an expert at creating image generation prompts for blog featured images. Based on the blog post content, create a detailed prompt in the EXACT same style as this example:\n\n\"Modern clean business illustration, Customer Data Platform CDP concept, many different data sources (website, mobile app, Wi-Fi login, loyalty card, phone call, CRM icons) flowing as colorful digital streams into one central glowing unified customer profile in the middle, the profile shows 360-degree customer view with segments, graphs, revenue forecast chart and personalized message icons coming out, professional blue and teal color palette, minimalistic flat design with subtle gradients and neon accents, infographic style, high-tech but approachable, no people or faces, white background, sharp details, vector art style\"\n\nRules:\n- Output ONLY the image prompt, nothing else\n- Keep the same structure: [style], [topic concept], [key visual elements flowing/connecting], [central element], [outputs/results], [color palette], [design style details]\n- The prompt should be in English regardless of the article language",
             'model' => 'mystic',
             'sub_model' => 'flexible',
             'aspect_ratio' => 'horizontal_2_1',
@@ -237,10 +242,26 @@ class Freepik_Featured_Image_Generator {
             'sanitize_callback' => [$this, 'sanitize_settings'],
         ]);
 
-        // API Section
+        // API Provider Section
+        add_settings_section(
+            'fpfig_provider_section',
+            __('API Provider', 'freepik-featured-image-generator'),
+            [$this, 'render_provider_section'],
+            'freepik-featured-image-generator'
+        );
+
+        add_settings_field(
+            'api_provider',
+            __('Provider', 'freepik-featured-image-generator'),
+            [$this, 'render_api_provider_field'],
+            'freepik-featured-image-generator',
+            'fpfig_provider_section'
+        );
+
+        // API Section (Freepik)
         add_settings_section(
             'fpfig_api_section',
-            __('API Configuration', 'freepik-featured-image-generator'),
+            __('Freepik API Configuration', 'freepik-featured-image-generator'),
             [$this, 'render_api_section'],
             'freepik-featured-image-generator'
         );
@@ -251,6 +272,46 @@ class Freepik_Featured_Image_Generator {
             [$this, 'render_api_key_field'],
             'freepik-featured-image-generator',
             'fpfig_api_section'
+        );
+
+        // OpenRouter Section
+        add_settings_section(
+            'fpfig_openrouter_section',
+            __('OpenRouter API Configuration', 'freepik-featured-image-generator'),
+            [$this, 'render_openrouter_section'],
+            'freepik-featured-image-generator'
+        );
+
+        add_settings_field(
+            'openrouter_api_key',
+            __('OpenRouter API Key', 'freepik-featured-image-generator'),
+            [$this, 'render_openrouter_api_key_field'],
+            'freepik-featured-image-generator',
+            'fpfig_openrouter_section'
+        );
+
+        add_settings_field(
+            'openrouter_model',
+            __('Image Model', 'freepik-featured-image-generator'),
+            [$this, 'render_openrouter_model_field'],
+            'freepik-featured-image-generator',
+            'fpfig_openrouter_section'
+        );
+
+        add_settings_field(
+            'openrouter_prompt_model',
+            __('Prompt Model', 'freepik-featured-image-generator'),
+            [$this, 'render_openrouter_prompt_model_field'],
+            'freepik-featured-image-generator',
+            'fpfig_openrouter_section'
+        );
+
+        add_settings_field(
+            'openrouter_prompt_system',
+            __('Prompt System Instructions', 'freepik-featured-image-generator'),
+            [$this, 'render_openrouter_prompt_system_field'],
+            'freepik-featured-image-generator',
+            'fpfig_openrouter_section'
         );
 
         // Model Section
@@ -372,7 +433,12 @@ class Freepik_Featured_Image_Generator {
     public function sanitize_settings($input) {
         $sanitized = [];
 
+        $sanitized['api_provider'] = in_array($input['api_provider'] ?? '', ['freepik', 'openrouter']) ? $input['api_provider'] : 'freepik';
         $sanitized['api_key'] = sanitize_text_field($input['api_key'] ?? '');
+        $sanitized['openrouter_api_key'] = sanitize_text_field($input['openrouter_api_key'] ?? '');
+        $sanitized['openrouter_model'] = sanitize_text_field($input['openrouter_model'] ?? 'google/gemini-3.1-flash-image-preview');
+        $sanitized['openrouter_prompt_model'] = sanitize_text_field($input['openrouter_prompt_model'] ?? 'google/gemini-2.5-flash');
+        $sanitized['openrouter_prompt_system'] = wp_kses_post($input['openrouter_prompt_system'] ?? '');
         $sanitized['model'] = sanitize_text_field($input['model'] ?? 'mystic');
         $sanitized['sub_model'] = sanitize_text_field($input['sub_model'] ?? 'flexible');
         $sanitized['aspect_ratio'] = sanitize_text_field($input['aspect_ratio'] ?? 'horizontal_2_1');
@@ -418,12 +484,20 @@ class Freepik_Featured_Image_Generator {
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
-            <?php if (!$this->get_option('api_key')): ?>
+            <?php
+            $provider = $this->get_option('api_provider');
+            $has_key = ($provider === 'openrouter') ? $this->get_option('openrouter_api_key') : $this->get_option('api_key');
+            if (!$has_key): ?>
                 <div class="notice notice-warning">
                     <p>
                         <strong><?php _e('API Key Required', 'freepik-featured-image-generator'); ?></strong><br>
-                        <?php _e('Please enter your Freepik API key to enable image generation.', 'freepik-featured-image-generator'); ?>
-                        <a href="https://www.freepik.com/api" target="_blank"><?php _e('Get API Key', 'freepik-featured-image-generator'); ?></a>
+                        <?php if ($provider === 'openrouter'): ?>
+                            <?php _e('Please enter your OpenRouter API key to enable image generation.', 'freepik-featured-image-generator'); ?>
+                            <a href="https://openrouter.ai/keys" target="_blank"><?php _e('Get API Key', 'freepik-featured-image-generator'); ?></a>
+                        <?php else: ?>
+                            <?php _e('Please enter your Freepik API key to enable image generation.', 'freepik-featured-image-generator'); ?>
+                            <a href="https://www.freepik.com/api" target="_blank"><?php _e('Get API Key', 'freepik-featured-image-generator'); ?></a>
+                        <?php endif; ?>
                     </p>
                 </div>
             <?php endif; ?>
@@ -497,6 +571,41 @@ class Freepik_Featured_Image_Generator {
 
         <script>
         jQuery(document).ready(function($) {
+            // Toggle Freepik / OpenRouter sections based on provider
+            function fpfigToggleProvider() {
+                var provider = $('#fpfig-api-provider').val();
+                var $freepikSection = $('#fpfig_api_section').closest('table').add($('#fpfig_api_section').prev('h2').length ? $('#fpfig_api_section').prev('h2') : $()).add($('#fpfig_api_section'));
+                var $openrouterSection = $('#fpfig_openrouter_section').closest('table').add($('#fpfig_openrouter_section').prev('h2').length ? $('#fpfig_openrouter_section').prev('h2') : $()).add($('#fpfig_openrouter_section'));
+                var $modelSection = $('#fpfig_model_section').closest('table').add($('#fpfig_model_section').prev('h2').length ? $('#fpfig_model_section').prev('h2') : $()).add($('#fpfig_model_section'));
+
+                // WordPress renders sections as: h2 title, then description (if any), then table
+                // We need to find elements between section headers
+                $('h2').each(function() {
+                    var text = $(this).text().trim();
+                    var $h2 = $(this);
+                    var $table = $h2.next('p').length ? $h2.next('p').next('table') : $h2.next('table');
+                    var $desc = $h2.next('p').length && !$h2.next('p').hasClass('submit') ? $h2.next('p') : $();
+
+                    if (text.indexOf('Freepik API') !== -1) {
+                        $h2.toggle(provider === 'freepik');
+                        $desc.toggle(provider === 'freepik');
+                        $table.toggle(provider === 'freepik');
+                    } else if (text.indexOf('OpenRouter API') !== -1) {
+                        $h2.toggle(provider === 'openrouter');
+                        $desc.toggle(provider === 'openrouter');
+                        $table.toggle(provider === 'openrouter');
+                    } else if (text.indexOf('Image Generation Settings') !== -1) {
+                        // Freepik-specific model settings
+                        $h2.toggle(provider === 'freepik');
+                        $desc.toggle(provider === 'freepik');
+                        $table.toggle(provider === 'freepik');
+                    }
+                });
+            }
+
+            fpfigToggleProvider();
+            $('#fpfig-api-provider').on('change', fpfigToggleProvider);
+
             // Test API connection
             $('#fpfig-test-api').on('click', function() {
                 var $btn = $(this);
@@ -555,8 +664,17 @@ class Freepik_Featured_Image_Generator {
     /**
      * Render section descriptions
      */
+    public function render_provider_section() {
+        echo '<p>' . __('Choose which API provider to use for image generation.', 'freepik-featured-image-generator') . '</p>';
+    }
+
     public function render_api_section() {
         echo '<p>' . __('Configure your Freepik API credentials.', 'freepik-featured-image-generator') . '</p>';
+    }
+
+    public function render_openrouter_section() {
+        echo '<p>' . __('Configure your OpenRouter API credentials.', 'freepik-featured-image-generator') . ' ';
+        echo '<a href="https://openrouter.ai/keys" target="_blank">' . __('Get API Key', 'freepik-featured-image-generator') . '</a></p>';
     }
 
     public function render_model_section() {
@@ -578,6 +696,17 @@ class Freepik_Featured_Image_Generator {
     /**
      * Render form fields
      */
+    public function render_api_provider_field() {
+        $value = $this->get_option('api_provider');
+        ?>
+        <select name="fpfig_settings[api_provider]" id="fpfig-api-provider">
+            <option value="freepik" <?php selected($value, 'freepik'); ?>>Freepik</option>
+            <option value="openrouter" <?php selected($value, 'openrouter'); ?>>OpenRouter</option>
+        </select>
+        <p class="description"><?php _e('Select the API provider for image generation.', 'freepik-featured-image-generator'); ?></p>
+        <?php
+    }
+
     public function render_api_key_field() {
         $value = $this->get_option('api_key');
         ?>
@@ -586,6 +715,51 @@ class Freepik_Featured_Image_Generator {
             <?php _e('Get your API key from', 'freepik-featured-image-generator'); ?>
             <a href="https://www.freepik.com/api" target="_blank">Freepik API</a>
         </p>
+        <?php
+    }
+
+    public function render_openrouter_api_key_field() {
+        $value = $this->get_option('openrouter_api_key');
+        ?>
+        <input type="password" name="fpfig_settings[openrouter_api_key]" value="<?php echo esc_attr($value); ?>" class="regular-text" autocomplete="off">
+        <p class="description">
+            <?php _e('Get your API key from', 'freepik-featured-image-generator'); ?>
+            <a href="https://openrouter.ai/keys" target="_blank">OpenRouter</a>
+        </p>
+        <?php
+    }
+
+    public function render_openrouter_model_field() {
+        $value = $this->get_option('openrouter_model');
+        ?>
+        <select name="fpfig_settings[openrouter_model]">
+            <option value="google/gemini-3.1-flash-image-preview" <?php selected($value, 'google/gemini-3.1-flash-image-preview'); ?>>Nano Banana 2 (Gemini 3.1 Flash)</option>
+            <option value="google/gemini-2.5-flash-image" <?php selected($value, 'google/gemini-2.5-flash-image'); ?>>Nano Banana (Gemini 2.5 Flash)</option>
+            <option value="google/gemini-3-pro-image-preview" <?php selected($value, 'google/gemini-3-pro-image-preview'); ?>>Nano Banana Pro (Gemini 3 Pro)</option>
+            <option value="openai/gpt-5-image" <?php selected($value, 'openai/gpt-5-image'); ?>>GPT-5 Image</option>
+        </select>
+        <p class="description"><?php _e('Select the AI model for image generation via OpenRouter.', 'freepik-featured-image-generator'); ?></p>
+        <?php
+    }
+
+    public function render_openrouter_prompt_model_field() {
+        $value = $this->get_option('openrouter_prompt_model');
+        ?>
+        <select name="fpfig_settings[openrouter_prompt_model]">
+            <option value="google/gemini-2.5-flash" <?php selected($value, 'google/gemini-2.5-flash'); ?>>Gemini 2.5 Flash (Fast, recommended)</option>
+            <option value="google/gemini-2.5-pro" <?php selected($value, 'google/gemini-2.5-pro'); ?>>Gemini 2.5 Pro</option>
+            <option value="anthropic/claude-sonnet-4" <?php selected($value, 'anthropic/claude-sonnet-4'); ?>>Claude Sonnet 4</option>
+            <option value="openai/gpt-4.1-mini" <?php selected($value, 'openai/gpt-4.1-mini'); ?>>GPT-4.1 Mini</option>
+        </select>
+        <p class="description"><?php _e('Text model that reads post content and generates the image prompt. Fast and cheap models work best.', 'freepik-featured-image-generator'); ?></p>
+        <?php
+    }
+
+    public function render_openrouter_prompt_system_field() {
+        $value = $this->get_option('openrouter_prompt_system');
+        ?>
+        <textarea name="fpfig_settings[openrouter_prompt_system]" rows="6" class="large-text code"><?php echo esc_textarea($value); ?></textarea>
+        <p class="description"><?php _e('System instructions for the text model that generates the image prompt from post content.', 'freepik-featured-image-generator'); ?></p>
         <?php
     }
 
@@ -834,8 +1008,10 @@ class Freepik_Featured_Image_Generator {
      * Render metabox content
      */
     public function render_metabox($post) {
-        // Check if API key is set
-        if (!$this->get_option('api_key')) {
+        // Check if API key is set for active provider
+        $provider = $this->get_option('api_provider');
+        $has_key = ($provider === 'openrouter') ? $this->get_option('openrouter_api_key') : $this->get_option('api_key');
+        if (!$has_key) {
             echo '<p style="color: #a00;">' . __('Please configure your API key in', 'freepik-featured-image-generator') . ' ';
             echo '<a href="' . admin_url('options-general.php?page=freepik-featured-image-generator') . '">' . __('Settings', 'freepik-featured-image-generator') . '</a></p>';
             return;
@@ -1164,14 +1340,19 @@ class Freepik_Featured_Image_Generator {
             ];
         }
 
-        // Build prompt (with optional style override)
-        $prompt_data = $this->build_image_prompt($post_id, $style_key);
+        // Build prompt: LLM-generated for OpenRouter, template-based for Freepik
+        if ($this->get_option('api_provider') === 'openrouter') {
+            $prompt_data = $this->build_prompt_via_llm($post_id, $style_key);
+        }
+        if (empty($prompt_data)) {
+            $prompt_data = $this->build_image_prompt($post_id, $style_key);
+        }
         if (!$prompt_data) {
             return new WP_Error('prompt_failed', __('Failed to build prompt', 'freepik-featured-image-generator'));
         }
 
-        // Call Freepik API
-        $result = $this->call_freepik_api($prompt_data['prompt']);
+        // Call API (Freepik or OpenRouter)
+        $result = $this->generate_image($prompt_data['prompt']);
 
         if (!$result['success']) {
             return new WP_Error('api_failed', $result['error'], ['status' => 500]);
@@ -1213,7 +1394,7 @@ class Freepik_Featured_Image_Generator {
         $prompt = $request->get_param('prompt');
         $post_id = $request->get_param('post_id');
 
-        $result = $this->call_freepik_api($prompt);
+        $result = $this->generate_image($prompt);
 
         if (!$result['success']) {
             return new WP_Error('api_failed', $result['error'], ['status' => 500]);
@@ -1226,8 +1407,9 @@ class Freepik_Featured_Image_Generator {
         ];
 
         // Optionally save to post
-        if ($post_id && !empty($result['image_url'])) {
-            $attachment_id = $this->save_image_as_attachment($result['image_url'], $post_id);
+        $image_source = $result['image_url'] ?? $result['image_data'] ?? null;
+        if ($post_id && $image_source) {
+            $attachment_id = $this->save_image_as_attachment($image_source, $post_id);
             if (!is_wp_error($attachment_id)) {
                 $response['attachment_id'] = $attachment_id;
                 $response['attachment_url'] = wp_get_attachment_url($attachment_id);
@@ -1290,6 +1472,91 @@ class Freepik_Featured_Image_Generator {
 
         return [
             'prompt' => $prompt,
+            'category' => $category_slug,
+            'style' => $style,
+            'style_key' => $used_style_key,
+        ];
+    }
+
+    /**
+     * Build image prompt via LLM (OpenRouter text model)
+     */
+    public function build_prompt_via_llm($post_id, $style_key = '') {
+        $post = get_post($post_id);
+        if (!$post) {
+            return null;
+        }
+
+        $api_key = $this->get_option('openrouter_api_key');
+        if (!$api_key) {
+            return null;
+        }
+
+        // Get category and style info
+        $categories = wp_get_post_categories($post_id, ['fields' => 'all']);
+        $category_slug = !empty($categories) ? $categories[0]->slug : 'default';
+        $category_name = !empty($categories) ? $categories[0]->name : 'General';
+
+        if ($style_key && $style_key !== 'auto') {
+            $style = $this->get_category_style($style_key);
+            $used_style_key = $style_key;
+        } else {
+            $style = $this->get_category_style($category_slug);
+            $used_style_key = 'auto';
+        }
+
+        // Prepare post content for LLM (strip HTML, limit length)
+        $content = strip_tags($post->post_content);
+        $content = preg_replace('/\s+/', ' ', $content);
+        if (mb_strlen($content) > 3000) {
+            $content = mb_substr($content, 0, 3000) . '...';
+        }
+
+        // Build user message with post data
+        $user_message = "Title: " . $post->post_title . "\n";
+        $user_message .= "Category: " . $category_name . "\n";
+        $user_message .= "Style preferences: colors — " . ($style['colors'] ?? 'professional') . ", elements — " . ($style['elements'] ?? 'business elements') . ", mood — " . ($style['mood'] ?? 'professional') . "\n\n";
+        $user_message .= "Article content:\n" . $content;
+
+        $system_prompt = $this->get_option('openrouter_prompt_system');
+        $prompt_model = $this->get_option('openrouter_prompt_model');
+
+        $body = [
+            'model' => $prompt_model,
+            'messages' => [
+                ['role' => 'system', 'content' => $system_prompt],
+                ['role' => 'user', 'content' => $user_message],
+            ],
+            'max_tokens' => 500,
+        ];
+
+        $response = wp_remote_post('https://openrouter.ai/api/v1/chat/completions', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+            ],
+            'body' => json_encode($body),
+            'timeout' => 30,
+        ]);
+
+        if (is_wp_error($response)) {
+            return null;
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
+        if ($status_code !== 200) {
+            return null;
+        }
+
+        $generated_prompt = trim($response_body['choices'][0]['message']['content'] ?? '');
+        if (empty($generated_prompt)) {
+            return null;
+        }
+
+        return [
+            'prompt' => $generated_prompt,
             'category' => $category_slug,
             'style' => $style,
             'style_key' => $used_style_key,
@@ -1393,6 +1660,95 @@ class Freepik_Featured_Image_Generator {
             'success' => false,
             'error' => sprintf(__('Generation timed out after %d seconds', 'freepik-featured-image-generator'), $max_attempts * $poll_interval),
             'task_id' => $task_id,
+        ];
+    }
+
+    /**
+     * Generate image via the configured provider
+     */
+    public function generate_image($prompt) {
+        if ($this->get_option('api_provider') === 'openrouter') {
+            return $this->call_openrouter_api($prompt);
+        }
+        return $this->call_freepik_api($prompt);
+    }
+
+    /**
+     * Call OpenRouter API
+     */
+    public function call_openrouter_api($prompt) {
+        $api_key = $this->get_option('openrouter_api_key');
+        if (!$api_key) {
+            return ['success' => false, 'error' => __('OpenRouter API key not configured', 'freepik-featured-image-generator')];
+        }
+
+        $model = $this->get_option('openrouter_model');
+
+        // Map Freepik aspect ratio format to OpenRouter format
+        // OpenRouter valid ratios: 1:1, 1:4, 1:8, 2:3, 3:2, 3:4, 4:1, 4:3, 4:5, 5:4, 8:1, 9:16, 16:9, 21:9
+        $aspect_ratio_map = [
+            'square_1_1' => '1:1',
+            'classic_4_3' => '4:3',
+            'traditional_3_2' => '3:2',
+            'horizontal_2_1' => '16:9',
+            'widescreen_16_9' => '16:9',
+            'panoramic_21_9' => '21:9',
+            'social_story_9_16' => '9:16',
+        ];
+        $freepik_ratio = $this->get_option('aspect_ratio');
+        $aspect_ratio = $aspect_ratio_map[$freepik_ratio] ?? '16:9';
+
+        $body = [
+            'model' => $model,
+            'messages' => [
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'modalities' => ['image', 'text'],
+            'image_config' => ['aspect_ratio' => $aspect_ratio],
+        ];
+
+        $response = wp_remote_post('https://openrouter.ai/api/v1/chat/completions', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+            ],
+            'body' => json_encode($body),
+            'timeout' => 120,
+        ]);
+
+        if (is_wp_error($response)) {
+            return ['success' => false, 'error' => $response->get_error_message()];
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
+        if ($status_code !== 200) {
+            $error_msg = $response_body['error']['message'] ?? $response_body['message'] ?? __('OpenRouter API request failed', 'freepik-featured-image-generator');
+            return [
+                'success' => false,
+                'error' => $error_msg,
+                'status_code' => $status_code,
+            ];
+        }
+
+        // Extract base64 image from response
+        // OpenRouter returns: choices[0].message.images[0].image_url.url as data:image/png;base64,...
+        $image_url = $response_body['choices'][0]['message']['images'][0]['image_url']['url'] ?? null;
+
+        if (!$image_url) {
+            return ['success' => false, 'error' => __('No image in OpenRouter response', 'freepik-featured-image-generator')];
+        }
+
+        // Strip data URI prefix to get raw base64
+        $base64_data = $image_url;
+        if (preg_match('/^data:image\/[^;]+;base64,(.+)$/', $image_url, $matches)) {
+            $base64_data = $matches[1];
+        }
+
+        return [
+            'success' => true,
+            'image_data' => $base64_data,
         ];
     }
 
@@ -1573,13 +1929,20 @@ class Freepik_Featured_Image_Generator {
             return;
         }
 
-        // Generate image
-        $prompt_data = $this->build_image_prompt($post_id);
+        // Generate image (LLM prompt for OpenRouter, template for Freepik)
+        $prompt_data = null;
+        if ($this->get_option('api_provider') === 'openrouter') {
+            $prompt_data = $this->build_prompt_via_llm($post_id);
+        }
+        if (!$prompt_data) {
+            $prompt_data = $this->build_image_prompt($post_id);
+        }
         if ($prompt_data) {
-            $result = $this->call_freepik_api($prompt_data['prompt']);
+            $result = $this->generate_image($prompt_data['prompt']);
 
-            if ($result['success'] && !empty($result['image_url'])) {
-                $attachment_id = $this->save_image_as_attachment($result['image_url'], $post_id);
+            $image_source = $result['image_url'] ?? $result['image_data'] ?? null;
+            if ($result['success'] && $image_source) {
+                $attachment_id = $this->save_image_as_attachment($image_source, $post_id);
                 if (!is_wp_error($attachment_id)) {
                     set_post_thumbnail($post_id, $attachment_id);
                     update_post_meta($post_id, '_fpfig_generated', true);
@@ -1604,30 +1967,56 @@ add_action('wp_ajax_fpfig_test_api', function() {
     }
 
     $plugin = Freepik_Featured_Image_Generator::get_instance();
-    $api_key = $plugin->get_option('api_key');
+    $provider = $plugin->get_option('api_provider');
 
-    if (!$api_key) {
-        wp_send_json_error(['message' => __('API key not configured', 'freepik-featured-image-generator')]);
-    }
+    if ($provider === 'openrouter') {
+        $api_key = $plugin->get_option('openrouter_api_key');
+        if (!$api_key) {
+            wp_send_json_error(['message' => __('OpenRouter API key not configured', 'freepik-featured-image-generator')]);
+        }
 
-    // Test API with simple request
-    $response = wp_remote_get('https://api.freepik.com/v1/resources', [
-        'headers' => ['x-freepik-api-key' => $api_key],
-        'timeout' => 10,
-    ]);
+        $response = wp_remote_get('https://openrouter.ai/api/v1/models', [
+            'headers' => ['Authorization' => 'Bearer ' . $api_key],
+            'timeout' => 10,
+        ]);
 
-    if (is_wp_error($response)) {
-        wp_send_json_error(['message' => $response->get_error_message()]);
-    }
+        if (is_wp_error($response)) {
+            wp_send_json_error(['message' => $response->get_error_message()]);
+        }
 
-    $status_code = wp_remote_retrieve_response_code($response);
+        $status_code = wp_remote_retrieve_response_code($response);
 
-    if ($status_code === 200) {
-        wp_send_json_success(['message' => __('Connection successful!', 'freepik-featured-image-generator')]);
-    } elseif ($status_code === 401) {
-        wp_send_json_error(['message' => __('Invalid API key', 'freepik-featured-image-generator')]);
+        if ($status_code === 200) {
+            wp_send_json_success(['message' => __('OpenRouter connection successful!', 'freepik-featured-image-generator')]);
+        } elseif ($status_code === 401) {
+            wp_send_json_error(['message' => __('Invalid OpenRouter API key', 'freepik-featured-image-generator')]);
+        } else {
+            wp_send_json_error(['message' => sprintf(__('OpenRouter API returned status %d', 'freepik-featured-image-generator'), $status_code)]);
+        }
     } else {
-        wp_send_json_error(['message' => sprintf(__('API returned status %d', 'freepik-featured-image-generator'), $status_code)]);
+        $api_key = $plugin->get_option('api_key');
+        if (!$api_key) {
+            wp_send_json_error(['message' => __('Freepik API key not configured', 'freepik-featured-image-generator')]);
+        }
+
+        $response = wp_remote_get('https://api.freepik.com/v1/resources', [
+            'headers' => ['x-freepik-api-key' => $api_key],
+            'timeout' => 10,
+        ]);
+
+        if (is_wp_error($response)) {
+            wp_send_json_error(['message' => $response->get_error_message()]);
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+
+        if ($status_code === 200) {
+            wp_send_json_success(['message' => __('Freepik connection successful!', 'freepik-featured-image-generator')]);
+        } elseif ($status_code === 401) {
+            wp_send_json_error(['message' => __('Invalid Freepik API key', 'freepik-featured-image-generator')]);
+        } else {
+            wp_send_json_error(['message' => sprintf(__('Freepik API returned status %d', 'freepik-featured-image-generator'), $status_code)]);
+        }
     }
 });
 
